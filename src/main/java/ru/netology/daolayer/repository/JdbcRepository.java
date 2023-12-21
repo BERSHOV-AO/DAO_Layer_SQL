@@ -1,11 +1,9 @@
 package ru.netology.daolayer.repository;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import ru.netology.daolayer.model.Orders;
+import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,26 +15,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@org.springframework.stereotype.Repository
-public class Repository {
+@Repository
+public class JdbcRepository {
 
-    @Autowired
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private static final String SCRIPT_FILE_NAME = "return_product_name.sql";
-
     private String scriptContent;
 
-    public Repository() {
+    public JdbcRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.scriptContent = read(SCRIPT_FILE_NAME);
     }
 
     public List<String> getProductName(String name) {
-
         Map<String, Object> params = new HashMap<>();
         params.put("name", name);
-        return Collections.singletonList(this.namedParameterJdbcTemplate.queryForList(scriptContent, params, String.class).toString());
+        return this.namedParameterJdbcTemplate.queryForList(scriptContent, params, String.class);
     }
+
 
     private static String read(String scriptFileName) {
         try (InputStream is = new ClassPathResource(scriptFileName).getInputStream();
